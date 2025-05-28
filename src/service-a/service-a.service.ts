@@ -1,29 +1,15 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import {
-  ClientProxy,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
+import { Injectable, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ServiceAService {
-  private client: ClientProxy;
-
-  constructor() {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.REDIS,
-      options: {
-        host: 'localhost',
-        port: 6379,
-      },
-    });
-  }
+  constructor(@Inject('REDIS_CLIENT') private readonly client: ClientProxy) {}
 
   async getDouble(numParam: string): Promise<number> {
     const num = Number(numParam);
     if (isNaN(num)) {
-      throw new BadRequestException('Invalid number');
+      throw new Error('Invalid number');
     }
 
     return await firstValueFrom(

@@ -1,18 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceBService } from './service-b.service';
+import { ServiceBService } from '../service-b/service-b.service';
 
 describe('ServiceBService', () => {
   let service: ServiceBService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ServiceBService],
-    }).compile();
-
-    service = module.get<ServiceBService>(ServiceBService);
+  beforeEach(() => {
+    service = new ServiceBService();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('should calculate double', () => {
+    expect(service.calculateDouble(5)).toBe(10);
+  });
+
+  it('should calculate square', () => {
+    expect(service.calculateSquare(5)).toBe(25);
   });
 });
