@@ -7,6 +7,15 @@ This project contains two services:
 
 ---
 
+## Enviroment variables
+
+You can create .env file with this example ports
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+PORT_A=3000
+PORT_B=3001
+
 ## 📦 Install dependencies
 
 ### Service-A (NestJS)
