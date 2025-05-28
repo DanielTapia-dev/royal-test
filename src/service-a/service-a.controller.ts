@@ -7,9 +7,9 @@ export class ServiceAController {
 
   @Get('double/:num')
   async getDouble(
-    @Param('num', ParseIntPipe) numParam: number,
+    @Param('num', ParseIntPipe) num: number,
   ): Promise<{ result: number }> {
-    const result = await this.serviceAService.getDouble(numParam);
+    const result = await this.serviceAService.getDouble(num);
     return { result };
   }
 }

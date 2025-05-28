@@ -76,3 +76,16 @@ This launches:
 ```
 
 ---
+
+## 🛠 Environment Variables
+
+Create a `.env` file in the root of the project with the following content:
+
+```
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+You can change these values depending on your environment.
+
+Make sure to load `ConfigModule` in your `AppModule` and inject `ConfigService` where needed.

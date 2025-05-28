@@ -1,29 +1,26 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { NestFactory } from '@nestjs/core';
 import { ServiceAModule } from './service-a/service-a.module';
-import { ServiceBModule } from './service-b/service-b.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
+  const redisHost = process.env.REDIS_HOST || 'localhost';
+  const redisPort = Number(process.env.REDIS_PORT || '6379');
+  const appPort = Number(process.env.PORT_A || '3000');
+
   const appA = await NestFactory.create(ServiceAModule);
+
   appA.connectMicroservice<MicroserviceOptions>({
     transport: Transport.REDIS,
     options: {
-      host: 'localhost',
-      port: 6379,
+      host: redisHost,
+      port: redisPort,
     },
   });
-  await appA.startAllMicroservices();
-  await appA.listen(3000);
 
-  const appB = await NestFactory.create(ServiceBModule);
-  appB.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.REDIS,
-    options: {
-      host: 'localhost',
-      port: 6379,
-    },
-  });
-  await appB.startAllMicroservices();
-  await appB.listen(3001);
+  await appA.startAllMicroservices();
+  await appA.listen(appPort);
 }
 bootstrap();
