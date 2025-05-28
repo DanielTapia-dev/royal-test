@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { once } from 'events';
+import Redis from 'ioredis';
+import { ERROR_MESSAGES } from 'src/common/constants';
 import { createRedisClient } from 'src/common/redis-client';
 
 interface DoubleResponse {
@@ -13,25 +15,22 @@ interface DoubleResponse {
 
 @Injectable()
 export class ServiceAService {
-  private publisher = createRedisClient();
+  private readonly publisher: Redis;
 
   constructor() {
-    this.publisher.connect().catch((err) => {
-      console.error('Redis publisher failed to connect:', err);
-    });
+    this.publisher = createRedisClient();
   }
 
   async getDouble(numParam: number): Promise<number> {
     const num = Number(numParam);
     if (isNaN(num)) {
-      throw new BadRequestException('Invalid number');
+      throw new BadRequestException(ERROR_MESSAGES.INVALID_NUMBER);
     }
 
     const requestId = uuidv4();
     const responseChannel = `response_${requestId}`;
 
     const tempSub = createRedisClient();
-    await tempSub.connect();
 
     try {
       await tempSub.subscribe(responseChannel);
@@ -42,20 +41,22 @@ export class ServiceAService {
       );
 
       const result = await Promise.race([
-        once(tempSub, 'message') as Promise<[string, string]>,
-        this.timeout(5000),
+        once(tempSub as any, 'message') as Promise<[string, string]>,
+        this.timeout(1500),
       ]);
 
       const [channel, message] = result;
 
       if (channel !== responseChannel) {
-        throw new InternalServerErrorException('Unexpected response channel');
+        throw new InternalServerErrorException(
+          ERROR_MESSAGES.UNEXPECTED_CHANNEL,
+        );
       }
 
       const data = JSON.parse(message) as DoubleResponse;
 
       if (typeof data.result !== 'number') {
-        throw new InternalServerErrorException('Invalid response format');
+        throw new InternalServerErrorException(ERROR_MESSAGES.INVALID_RESPONSE);
       }
 
       return data.result;
@@ -68,12 +69,7 @@ export class ServiceAService {
   private timeout(ms: number): Promise<never> {
     return new Promise((_, reject) =>
       setTimeout(
-        () =>
-          reject(
-            new InternalServerErrorException(
-              'Timeout waiting for service-b response',
-            ),
-          ),
+        () => reject(new InternalServerErrorException(ERROR_MESSAGES.TIMEOUT)),
         ms,
       ),
     );
