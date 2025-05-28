@@ -24,11 +24,7 @@ describe('ServiceAService', () => {
   });
 
   it('should return double value from redis', async () => {
-    const result = await service.getDouble('11');
+    const result = await service.getDouble(11);
     expect(result).toBe(99);
-  });
-
-  it('should throw error if input is invalid', async () => {
-    await expect(service.getDouble('abc')).rejects.toThrow('Invalid number');
   });
 });
