@@ -1,91 +1,81 @@
-# NestJS Microservices with Redis - `service-a` and `service-b`
+# Microservices: Double & Square
 
-This project is a simple example of a NestJS monorepo application with two services (`service-a` and `service-b`) communicating through Redis as a message broker.
+This project contains two services:
 
-## 📦 Structure
-
-```
-src/
-├── service-a/         # Exposes /double/:num endpoint and sends message via Redis
-│   ├── service-a.controller.ts
-│   ├── service-a.service.ts
-│
-├── service-b/         # Listens to 'double_number' message and exposes /square/:num
-│   ├── service-b.controller.ts
-│   ├── service-b.service.ts
-│
-├── main.ts            # Boots both services with Redis integration
-```
+- **Service-A (NestJS)**: Exposes a REST endpoint `/double/:num`, sends the number via Redis, and receives the doubled result.
+- **Service-B (Node.js)**: Listens to Redis messages, calculates the double, and exposes a REST endpoint `/square/:num` to return the square of a number.
 
 ---
 
-## 🚀 Getting Started
+## 📦 Install dependencies
 
-### 1. Clone the repository
-
-```bash
-git clone https://your-repo-url.git
-cd your-repo-folder
-```
-
-### 2. Install dependencies
+### Service-A (NestJS)
 
 ```bash
+cd service-a
 npm install
 ```
 
-### 3. Start Redis (via Docker)
+### Service-B (Node.js)
 
 ```bash
-docker run --name redis-nest -p 6379:6379 -d redis
+cd service-b
+npm install
 ```
 
-### 4. Run the NestJS app
+---
+
+## 🐳 Run Redis using Docker (recommended)
+
+You need Redis running for inter-service communication. The easiest way is via Docker:
 
 ```bash
+docker run --name redis-microservice -p 6379:6379 -d redis
+```
+
+> If you already have Redis installed locally, you can skip Docker.
+
+---
+
+## 🚀 Run the project
+
+### 1. Start Service-B (Node.js)
+
+```bash
+cd service-b
+npm start
+```
+
+This will start the REST endpoint at:  
+`http://localhost:3001/square/:num`  
+And the worker will listen on Redis for `double_number` events.
+
+### 2. Start Service-A (NestJS)
+
+```bash
+cd service-a
 npm run start:dev
 ```
 
-This launches:
-
-- `service-a` on [http://localhost:3000](http://localhost:3000)
-- `service-b` on [http://localhost:3001](http://localhost:3001)
+This will expose the endpoint:  
+`http://localhost:3000/double/:num`
 
 ---
 
-## 📡 API Usage
+## 🧪 Run Tests
 
-### ➤ `GET /double/:num`
+### Service-A (NestJS)
 
-- URL: `http://localhost:3000/double/5`
-- Description: Sends the number to `service-b` via Redis and returns its double.
-- Response:
-
-```json
-{ "result": 10 }
+```bash
+cd service-a
+npm run test
 ```
 
-### ➤ `GET /square/:num`
+### Service-B (Node.js)
 
-- URL: `http://localhost:3001/square/4`
-- Description: Returns the square of the number.
-- Response:
-
-```json
-{ "result": 16 }
+```bash
+cd service-b
+npm test
 ```
 
----
-
-## 🛠 Environment Variables
-
-Create a `.env` file in the root of the project with the following content:
-
-```
-REDIS_HOST=localhost
-REDIS_PORT=6379
-```
-
-You can change these values depending on your environment.
-
-Make sure to load `ConfigModule` in your `AppModule` and inject `ConfigService` where needed.
+> Make sure Redis is running before running integration tests.
