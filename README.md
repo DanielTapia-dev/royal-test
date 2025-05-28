@@ -11,10 +11,12 @@ This project contains two services:
 
 You can create .env file with this example ports
 
+```bash
 REDIS_HOST=localhost
 REDIS_PORT=6379
 PORT_A=3000
 PORT_B=3001
+```
 
 ## 📦 Install dependencies
 
